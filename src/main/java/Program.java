@@ -5,7 +5,7 @@ public class Program {
 
     private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
-    private static final int WIN_COUNT = 3;
+    private static int WIN_COUNT;
     private static final char DOT_HUMAN = 'X';
     private static final char DOT_AI = '0';
     private static final char DOT_EMPTY = '*';
@@ -15,11 +15,11 @@ public class Program {
 
     public static void main(String[] args) {
         while (true) {
-            initialize();
-            printField();
+            initialize(); //заполнение массива *
+            printField(); //вывод игрового поля
             while (true) {
-                humanTurn();
-                printField();
+                humanTurn(); //изменение * на х (ход игрока)
+                printField(); //вывод игрового поля
                 if (checkState(DOT_HUMAN, "Вы победили!"))
                     break;
                 aiTurn();
@@ -28,7 +28,7 @@ public class Program {
                     break;
             }
             System.out.println("Желаете сыграть еще раз? (Y - да): ");
-            if(!scanner.next().equalsIgnoreCase("Y"))
+            if (!scanner.next().equalsIgnoreCase("Y"))
 
                 break;
         }
@@ -38,8 +38,16 @@ public class Program {
      * Инициализация объектов игры
      */
     static void initialize() {
-        fieldSizeX = 3;
-        fieldSizeY = 3;
+        System.out.println("Выберите ширину игрового поля");
+        fieldSizeX = scanner.nextInt();
+        System.out.println("Выберите высоту игрового поля");
+        fieldSizeY = scanner.nextInt();
+        int max = fieldSizeX;
+        if (max > fieldSizeY)
+            max = fieldSizeY;
+
+        System.out.println("Сколько фишек подряд будут составлять выйгрышную комбинацию? Выберите от 3 до " + max);
+        WIN_COUNT = scanner.nextInt();
         field = new char[fieldSizeX][fieldSizeY];
         for (int x = 0; x < fieldSizeX; x++) {
             for (int y = 0; y < fieldSizeY; y++) {
@@ -161,6 +169,34 @@ public class Program {
         return false;
     }
 
+    static boolean checkWin2(char dot) {
+        for (int x = 0; x <= fieldSizeX - WIN_COUNT; x++) {
+            for (int y = 0; y <= fieldSizeY - 1; y++) {
+                if (field[x][y] == dot && field[x + 1][y] == dot && field[x + 2][y] == dot) return true;
+            }
+
+        }
+        for (int x = 0; x <= fieldSizeX - 1; x++) {
+            for (int y = 0; y <= fieldSizeY - WIN_COUNT; y++) {
+                if (field[x][y] == dot && field[x][y + 1] == dot && field[x][y + 2] == dot) return true;
+            }
+
+        }
+        for (int x = 0; x <= fieldSizeX - WIN_COUNT; x++) {
+            for (int y = 0; y <= fieldSizeY - WIN_COUNT; y++) {
+                if (field[x][y] == dot && field[x + 1][y + 1] == dot && field[x + 2][y + 2] == dot) return true;
+            }
+
+        }
+        for (int x = 0; x <= fieldSizeX - WIN_COUNT; x++) {
+            for (int y = WIN_COUNT - 1; y <= fieldSizeY - 1; y++) {
+                if (field[x][y] == dot && field[x + 1][y - 1] == dot && field[x + 2][y - 2] == dot) return true;
+            }
+
+        }
+        return false;
+    }
+
     /**
      * Проверка состояния игры
      *
@@ -169,10 +205,10 @@ public class Program {
      * @return
      */
     static boolean checkState(char dot, String s) {
-        if (checkWin(dot)) {
+        if (checkWin2(dot)) {
             System.out.println(s);
             return true;
-        } else if ((checkDraw())) {
+        } else if (checkDraw()) {
             System.out.println("Ничья!");
             return true;
         }
